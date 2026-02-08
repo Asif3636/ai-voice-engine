@@ -1,25 +1,27 @@
-TTS
-fastapi
-uvicorn
-soundfile
-from fastapi import FastAPI
+import gradio as gr
 from TTS.api import TTS
 
-app = FastAPI()
-
-# Load voice cloning model
 tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2")
 
-@app.get("/")
-def home():
-    return {"status": "AI Voice Server Running"}
-
-@app.get("/speak")
-def speak(text: str):
+def generate_voice(text, audio):
+    output_path = "output.wav"
     tts.tts_to_file(
         text=text,
-        speaker_wav="voice_sample.wav",
+        speaker_wav=audio,
         language="en",
-        file_path="output.wav"
+        file_path=output_path
     )
-    return {"message": "Audio generated as output.wav"}
+    return output_path
+
+demo = gr.Interface(
+    fn=generate_voice,
+    inputs=[
+        gr.Textbox(label="Enter Text"),
+        gr.Audio(type="filepath", label="Upload Voice Sample (10-30 sec)")
+    ],
+    outputs=gr.Audio(label="Generated Voice"),
+    title="AI Voice Clone",
+    description="Upload a voice sample and generate AI speech"
+)
+
+demo.launch()
