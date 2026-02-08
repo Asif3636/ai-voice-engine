@@ -2,3 +2,24 @@ TTS
 fastapi
 uvicorn
 soundfile
+from fastapi import FastAPI
+from TTS.api import TTS
+
+app = FastAPI()
+
+# Load voice cloning model
+tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2")
+
+@app.get("/")
+def home():
+    return {"status": "AI Voice Server Running"}
+
+@app.get("/speak")
+def speak(text: str):
+    tts.tts_to_file(
+        text=text,
+        speaker_wav="voice_sample.wav",
+        language="en",
+        file_path="output.wav"
+    )
+    return {"message": "Audio generated as output.wav"}
